@@ -1,0 +1,26 @@
+{
+  "name": "copilotkit-server",
+  "version": "1.0.0",
+  "description": "CopilotKit HTTP Server with LangGraph Agent",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "keywords": [
+    "copilotkit",
+    "langgraph",
+    "openai"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@copilotkit/runtime": "^1.10.6",
+    "dotenv": "^16.4.5",
+    "openai": "^4.77.3"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}
