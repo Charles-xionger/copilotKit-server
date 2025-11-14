@@ -1,0 +1,56 @@
+services:
+  # CopilotKit Server 服务 - 使用镜像部署
+  copilot-server:
+    image: copilot-server:latest # 🔥 使用构建好的镜像
+    container_name: copilot-server
+    restart: always
+    ports:
+      - "3001:3001"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-sk-EmoCff32UUl3lQKxtqNheEp6T8kyRM8c9CJsML9DhWveDf3O}
+      - OPENAI_API_BASE_URL=${OPENAI_API_BASE_URL:-https://api.chatgptsb.com/v1}
+      - LANGGRAPH_URL=${LANGGRAPH_URL:-http://101.133.175.174:8123}
+      - PORT=3001
+      - NODE_ENV=production
+    networks:
+      - copilot-network
+      - traefik_net # Traefik 网络
+    labels:
+      #######################################################################
+      # Traefik 反向代理核心标签（后端 API 服务）
+      #######################################################################
+      # 1. 允许 Traefik 代理该服务
+      - "traefik.enable=true"
+
+      # 2. 配置 API 访问域名和路径
+      - "traefik.http.routers.copilot-api.rule=Host(`copilot.xiongerer.xyz`) && PathPrefix(`/copilotkit`)"
+
+      # 3. 绑定 Traefik 的入口
+      - "traefik.http.routers.copilot-api.entrypoints=websecure"
+
+      # 4. 启用 HTTPS 证书
+      - "traefik.http.routers.copilot-api.tls=true"
+      - "traefik.http.routers.copilot-api.tls.certresolver=letsencrypt"
+
+      # 5. 指向容器内部端口
+      - "traefik.http.services.copilot-api.loadbalancer.server.port=3001"
+
+      # 6. CORS 中间件（允许前端跨域访问）
+      - "traefik.http.routers.copilot-api.middlewares=copilot-cors"
+      - "traefik.http.middlewares.copilot-cors.headers.accesscontrolallowmethods=GET,POST,OPTIONS,PUT,DELETE"
+      - "traefik.http.middlewares.copilot-cors.headers.accesscontrolalloworigin=*"
+      - "traefik.http.middlewares.copilot-cors.headers.accesscontrolallowheaders=*"
+
+      #######################################################################
+      # HTTP 跳转 HTTPS
+      #######################################################################
+      - "traefik.http.routers.copilot-api-http.rule=Host(`copilot.xiongerer.xyz`) && PathPrefix(`/copilotkit`)"
+      - "traefik.http.routers.copilot-api-http.entrypoints=web"
+      - "traefik.http.routers.copilot-api-http.middlewares=redirect-to-https"
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+
+networks:
+  copilot-network:
+    driver: bridge
+  traefik_net:
+    external: true
