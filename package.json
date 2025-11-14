@@ -3,10 +3,20 @@
   "version": "1.0.0",
   "description": "CopilotKit HTTP Server with LangGraph Agent",
   "type": "module",
-  "main": "server.js",
+  "main": "dist/server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node --watch server.js"
+    "build": "tsup",
+    "build:watch": "tsup --watch",
+    "start": "node dist/server.js",
+    "start:prod": "NODE_ENV=production node dist/server.js",
+    "dev": "tsup --watch --onSuccess \"node dist/server.js\"",
+    "dev:ts": "tsx watch src/server.ts",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src/**/*.ts",
+    "test": "vitest",
+    "docker:build": "docker build -t copilot-server:latest .",
+    "docker:run": "docker run -p 3001:3001 --env-file .env copilot-server:latest"
   },
   "keywords": [
     "copilotkit",
@@ -21,6 +31,9 @@
     "openai": "^4.77.3"
   },
   "devDependencies": {
-    "concurrently": "^9.2.1"
+    "@types/node": "^20.10.5",
+    "concurrently": "^9.2.1",
+    "tsup": "^8.0.1",
+    "typescript": "^5.3.3"
   }
 }
